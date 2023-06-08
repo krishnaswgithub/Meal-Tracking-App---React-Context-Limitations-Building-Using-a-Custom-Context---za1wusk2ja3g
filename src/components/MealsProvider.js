@@ -23,60 +23,9 @@
 // export default MealsProvider;
 
 
-import React, { createContext, useContext, useState } from 'react';
-import '../styles/App.css';
+import React, { useState } from 'react';
 
-const MealsContext = createContext();
-
-const App = () => {
-  return (
-    <div id="main">
-      <MealsProvider>
-        <MealsList />
-        <Counter />
-      </MealsProvider>
-    </div>
-  );
-};
-
-export default App;
-
-const Counter = () => {
-  const { meals } = useContext(MealsContext);
-  const remainingMeals = meals.filter((meal) => !meal.ticked);
-
-  return (
-    <div>
-      <h3>Meals Remaining: {remainingMeals.length}</h3>
-    </div>
-  );
-};
-
-export default Counter;
-
-const MealsList = () => {
-  const { meals, tickMeal } = useContext(MealsContext);
-
-  const handleTick = (id) => {
-    tickMeal(id);
-  };
-
-  return (
-    <div>
-      <h2>Meals:</h2>
-      <ul>
-        {meals.map((meal) => (
-          <li key={meal.id}>
-            <input type="checkbox" checked={meal.ticked} onChange={() => handleTick(meal.id)} />
-            {meal.name}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-export default MealsList;
+export const MealsContext = React.createContext();
 
 const todaysMeals = [
   { id: 1, name: 'Baked Beans', ticked: false },
@@ -88,17 +37,19 @@ const MealsProvider = ({ children }) => {
   const [meals, setMeals] = useState(todaysMeals);
 
   const tickMeal = (id) => {
-    const updatedMeals = meals.map((meal) => {
-      if (meal.id === id) {
-        return { ...meal, ticked: !meal.ticked };
-      }
-      return meal;
-    });
-
-    setMeals(updatedMeals);
+    setMeals((prevMeals) =>
+      prevMeals.map((meal) =>
+        meal.id === id ? { ...meal, ticked: !meal.ticked } : meal
+      )
+    );
   };
 
-  return <MealsContext.Provider value={{ meals, tickMeal }}>{children}</MealsContext.Provider>;
+  return (
+    <MealsContext.Provider value={{ meals, tickMeal }}>
+      {children}
+    </MealsContext.Provider>
+  );
 };
 
 export default MealsProvider;
+
